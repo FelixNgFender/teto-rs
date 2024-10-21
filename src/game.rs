@@ -4,16 +4,15 @@ use std::io;
 
 #[derive(Debug, Default)]
 pub struct GameState {
-    pub counter: u8,
     pub score: u32,
     pub level: u8,
-    exit: bool,
+    should_quit: bool,
 }
 
 impl GameState {
     /// runs the application's main loop until the user quits
     pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
-        while !self.exit {
+        while !self.should_quit {
             terminal.draw(|frame| self.draw(frame))?;
             self.handle_events()?;
         }
@@ -47,15 +46,15 @@ impl GameState {
     }
 
     fn exit(&mut self) {
-        self.exit = true;
+        self.should_quit = true;
     }
 
     fn increment_counter(&mut self) {
-        self.counter = self.counter.saturating_add(1);
+        self.score = self.score.saturating_add(1);
     }
 
     fn decrement_counter(&mut self) {
-        self.counter = self.counter.saturating_sub(1);
+        self.score = self.score.saturating_sub(1);
     }
 }
 
@@ -68,14 +67,14 @@ mod tests {
     fn handle_key_event() -> io::Result<()> {
         let mut app = GameState::default();
         app.handle_key_event(KeyCode::Right.into());
-        assert_eq!(app.counter, 1);
+        assert_eq!(app.score, 1);
 
         app.handle_key_event(KeyCode::Left.into());
-        assert_eq!(app.counter, 0);
+        assert_eq!(app.score, 0);
 
         let mut app = GameState::default();
         app.handle_key_event(KeyCode::Char('q').into());
-        assert!(app.exit);
+        assert!(app.should_quit);
 
         Ok(())
     }
